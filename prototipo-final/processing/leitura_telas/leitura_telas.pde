@@ -1,0 +1,111 @@
+import processing.serial.*;
+
+Serial myPort;
+
+int card_id = 0;
+int proximity = 0;
+int currentScreen = -1;
+int screenStartTime = 0;
+
+int DIST = 0;
+int ID = 0;
+
+void setup() {
+  String[] ports = Serial.list();
+  if (ports.length > 2) {
+    myPort = new Serial(this, ports[2], 9600);
+  } else {
+    println("Não há portas seriais disponíveis.");
+  }
+  fullScreen();
+}
+
+void draw() {
+  monitorSerial();
+  switch (currentScreen) {
+    case -1:
+      screenDefault();
+      break;
+    case 0:
+      screen00();
+      break;
+    case 1:
+      screen01();
+      break;
+    case 2:
+      screen02();
+      break;
+    case 3:
+      screen03();
+      break;
+    case 4:
+      screen04();
+      break;
+    case 5:
+      screen05();
+      break;
+  }
+  //println("TELA: "+currentScreen);
+  
+}
+
+void monitorSerial() {
+  while (myPort != null && myPort.available() > 0) {
+    String message = myPort.readStringUntil('\n');
+    if (message != null) {
+      parseMessage(message);
+    }
+  }
+}
+
+void parseMessage(String message) {
+  if (message.startsWith("TELA")) {
+    String telaValue = message.substring(5).trim();
+    currentScreen = Integer.parseInt(telaValue);
+  }
+}
+
+
+void screenDefault() {
+  displayScreen("Tela Default");
+}
+
+void screen00() {
+  displayScreen("Tela 0");
+}
+
+void screen01() {
+  displayScreen("Tela 1");
+}
+
+void screen02() {
+  displayScreen("Tela 2");
+
+  if (millis() - screenStartTime >= 3000) {
+    currentScreen = 3;
+  }
+}
+
+void screen03() {
+  displayScreen("Tela 3");
+}
+
+void screen04() {
+  displayScreen("Tela 4");
+}
+
+void screen05() {
+  displayScreen("Tela 5");
+}
+
+void displayScreen(String text) {
+  background(0);
+  textAlign(CENTER, CENTER);
+  fill(255);
+  textSize(20);
+  text(text, width / 2, height / 2);
+
+  if (currentScreen == 2 && screenStartTime == 0) {
+    screenStartTime = millis();
+  }
+}
